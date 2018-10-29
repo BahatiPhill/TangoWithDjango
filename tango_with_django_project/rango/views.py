@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 
+from rango.bing_search import run_query
 
 
 # Create your views here.
@@ -33,7 +34,7 @@ def visitor_cookie_handler(request):
 
     else:
         visits = 1
-        response.session['last_visit'] =  last_visit_cookie
+        request.session['last_visit'] =  last_visit_cookie
 
     request.session['visits'] = visits
 
@@ -189,3 +190,14 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('index'))
+
+
+def search(request):
+    result_list = []
+    
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+        if query:
+            result_list = run_query(query)
+            
+    return render(request, 'rango/search.html', {'result_list': result_list})
